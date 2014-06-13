@@ -33,9 +33,10 @@ class UserActor extends Actor {
             context.parent ! Speak(msgFromConsole)
             log.debug(s"Message from console received: $msgFromConsole")
         }
+
       case Speak(text) =>
-        val labeledText = sender().path.name + ": " + text
-        println(labeledText)
+        val formattedText = s"\n${sender().path.name}:\n$text"
+        println(formattedText)
     }
   }
 }

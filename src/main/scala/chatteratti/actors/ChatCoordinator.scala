@@ -12,7 +12,7 @@ class ChatCoordinator extends Actor with FSM[ChatCoordinatorState, ChatCoordinat
     case Event(NewChat, UninitializedData) =>
       log.debug("NewChat received while in ChatOffline state.")
       val user = context.actorOf(Props[UserActor], "user")
-      val chatBot = context.actorOf(Props[OpinionBot], "fortuneteller")
+      val chatBot = context.actorOf(Props[FortuneActor], "fortuneteller")
       goto(ChatOnlineState) using ChatData(List(user, chatBot), List[String]())
 
     case Event(StartChatting, ChatData(chatters, _)) =>
@@ -26,6 +26,7 @@ class ChatCoordinator extends Actor with FSM[ChatCoordinatorState, ChatCoordinat
       (chatters diff List(sender())).foreach(_ forward Speak(text))
       val labeledText = sender().path.name + ": " + text
       stay using ChatData(chatters, msgsSoFar :+ labeledText)
+
     case Event(StopChatting, ChatData(chatters, _)) =>
       log.debug("StopChat event received while in ChatOnline state.")
       goto(ChatOfflineState) using ChatData(chatters, Nil)
@@ -40,6 +41,7 @@ class ChatCoordinator extends Actor with FSM[ChatCoordinatorState, ChatCoordinat
       println("-- End server chat log --")
       context.system.shutdown()
       stay()
+
     case Event(e, s) =>
       log.warning(s"received unhandled request $e in state $stateName/$s")
       stay()
