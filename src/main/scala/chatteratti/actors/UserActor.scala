@@ -11,34 +11,31 @@ class UserActor extends Actor {
 
   def receive = {
     case message: UserProtocol => message match {
-      case Begin() => {
+      case Begin() =>
         log.debug("Enabling console")
         console ! EnableConsole()
-      }
-      case MessageFromConsole(msgFromConsole) => {
+
+      case MessageFromConsole(msgFromConsole) =>
         msgFromConsole match {
-          case "done" => {
+          case "done" =>
             log.debug("done received")
             context.parent ! KillChat
-          }
-          case "stop" => {
+
+          case "stop" =>
             log.debug("stop received")
             context.parent ! StopChatting
-          }
-          case "start" => {
+
+          case "start" =>
             log.debug("start received")
             context.parent ! StartChatting
-          }
-          case _ => {
+
+          case _ =>
             context.parent ! Speak(msgFromConsole)
-            log.debug("Message from console received: {}", msgFromConsole)
-          }
+            log.debug(s"Message from console received: $msgFromConsole")
         }
-      }
-      case Speak(text) => {
-        val labeledText = sender.path.name + ": " + text
+      case Speak(text) =>
+        val labeledText = sender().path.name + ": " + text
         println(labeledText)
-      }
     }
   }
 }
